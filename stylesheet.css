@@ -1,0 +1,32 @@
+/* Menu */
+ul {
+}
+
+/* Label */
+button {
+}
+
+/* Selected label */
+ul > li > button:not(:only-child) {
+}
+
+/* Menu item */
+ul > li {
+}
+
+/* Submenu */
+ul > li > ul {
+}
+
+/* Submenu item */
+ul > li > ul > li {
+}
+
+/* Submenu label */
+ul > li > ul > li > button {
+}
+
+/* Hovered submenu label */
+ul > li > ul > li > button:hover {
+}
+
