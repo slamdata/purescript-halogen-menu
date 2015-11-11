@@ -129,8 +129,7 @@ menuComponent = parentComponent' render eval peek
     renderButton :: forall f p. Action f -> String -> HTML p f
     renderButton a label =
       H.button
-        [ E.onClick (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit)
-        ]
+        [ E.onClick (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit) ]
         [ H.text $ label ]
 
     renderButtonWithMouseoverAction :: forall f p. Action f -> String -> HTML p f
