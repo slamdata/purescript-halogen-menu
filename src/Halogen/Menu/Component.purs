@@ -102,7 +102,8 @@ menuComponent = parentComponent' render eval peek
     renderSubmenu :: Tuple Int (MenuItem a) -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderSubmenu (Tuple index menuSubmenu)
       | menu.chosen == Just index = renderChosenSubmenu index menuSubmenu
-      | otherwise = renderHiddenSubmenu index menuSubmenu
+      | menu.chosen == Nothing = renderHiddenSubmenu index menuSubmenu
+      | otherwise = renderMouseOverSelectableHiddenSubmenu index menuSubmenu
 
     renderChosenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderChosenSubmenu index menuSubmenu =
@@ -116,12 +117,27 @@ menuComponent = parentComponent' render eval peek
 
     renderHiddenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderHiddenSubmenu index menuSubmenu =
-        H.li_ [ H.div_ [ renderButton (SelectSubmenu index) menuSubmenu.label ] ]
+      H.li_ [ H.div_ [ renderButton (SelectSubmenu index) menuSubmenu.label ] ]
+
+    renderMouseOverSelectableHiddenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
+    renderMouseOverSelectableHiddenSubmenu index menuSubmenu =
+      H.li_
+        [ H.div_
+            [ renderButtonWithMouseoverAction (SelectSubmenu index) menuSubmenu.label ]
+        ]
 
     renderButton :: forall f p. Action f -> String -> HTML p f
     renderButton a label =
       H.button
         [ E.onClick (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit) ]
+        [ H.text $ label ]
+
+    renderButtonWithMouseoverAction :: forall f p. Action f -> String -> HTML p f
+    renderButtonWithMouseoverAction a label =
+      H.button
+        [ E.onClick (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit)
+        , E.onMouseOver (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit)
+        ]
         [ H.text $ label ]
 
   eval :: Natural (MenuQuery a) (ParentDSL (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress)
