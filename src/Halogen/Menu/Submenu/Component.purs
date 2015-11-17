@@ -1,7 +1,7 @@
 module Halogen.Menu.Submenu.Component
   ( submenuComponent
-  , module Halogen.Menu.Submenu.Model
-  , module Halogen.Menu.Submenu.Query
+  , module Halogen.Menu.Submenu.Component.State
+  , module Halogen.Menu.Submenu.Component.Query
   ) where
 
 import Prelude
@@ -13,8 +13,8 @@ import Halogen
 import qualified Halogen.HTML.Events.Indexed as E
 import qualified Halogen.HTML.Indexed as H
 
-import Halogen.Menu.Submenu.Model (Submenu(), SubmenuItem())
-import Halogen.Menu.Submenu.Query (SubmenuQuery(..))
+import Halogen.Menu.Submenu.Component.State (Submenu(), SubmenuItem())
+import Halogen.Menu.Submenu.Component.Query (SubmenuQuery(..))
 
 submenuComponent :: forall g a. Component (Submenu a) (SubmenuQuery a) g
 submenuComponent = component render eval

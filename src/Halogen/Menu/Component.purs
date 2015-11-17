@@ -4,8 +4,8 @@ module Halogen.Menu.Component
   , MenuQueryP()
   , SubmenuSlotAddress(..)
   , menuComponent
-  , module Halogen.Menu.Model
-  , module Halogen.Menu.Query
+  , module Halogen.Menu.Component.State
+  , module Halogen.Menu.Component.Query
   ) where
 
 import Prelude
@@ -25,11 +25,11 @@ import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Properties.Indexed as P
 import qualified Halogen.HTML.Events.Handler as EH
 
-import Halogen.Menu.Model (Menu(), MenuItem())
-import Halogen.Menu.Query (MenuQuery(..))
+import Halogen.Menu.Component.State (Menu(), MenuItem())
+import Halogen.Menu.Component.Query (MenuQuery(..))
 import Halogen.Menu.Submenu.Component (submenuComponent)
-import Halogen.Menu.Submenu.Model (Submenu())
-import Halogen.Menu.Submenu.Query (SubmenuQuery(..))
+import Halogen.Menu.Submenu.Component.State (Submenu())
+import Halogen.Menu.Submenu.Component.Query (SubmenuQuery(..))
 
 -- | Type synonym for the state of menu components.
 -- |
@@ -65,7 +65,7 @@ instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress where compare = gCompar
 -- | ##### State
 -- | An example of constructing the initial state of a menu component is
 -- | available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/ColorEditorMenu/Model.purs#L8).
+-- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/ColorEditorMenu/State.purs#L8).
 -- |
 -- | ##### Component
 -- | An example of installing a menu component is available

@@ -1,4 +1,4 @@
-module Halogen.Menu.Submenu.Query where
+module Halogen.Menu.Submenu.Component.Query where
 
 import Prelude
 
