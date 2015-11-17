@@ -65,7 +65,7 @@ instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress where compare = gCompar
 -- | ##### State
 -- | An example of constructing the initial state of a menu component is
 -- | available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/ColorEditorMenu/State.purs#L8).
+-- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditorMenu/Component/State.purs#L8).
 -- |
 -- | ##### Component
 -- | An example of installing a menu component is available
