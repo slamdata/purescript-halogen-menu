@@ -1,10 +1,10 @@
-module Halogen.Menu.Model where
+module Halogen.Menu.Component.State where
 
 import Prelude
 
 import Data.Maybe (Maybe(..))
 
-import Halogen.Menu.Submenu.Model (Submenu())
+import Halogen.Menu.Submenu.Component.State (Submenu())
 
 type Menu a =
   { chosen :: Maybe Int
