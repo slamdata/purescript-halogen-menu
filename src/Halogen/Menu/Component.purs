@@ -20,9 +20,8 @@ import Data.NaturalTransformation (Natural())
 import Data.Tuple (Tuple(..))
 
 import Halogen
-import qualified Halogen.HTML.Events.Indexed as E
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Properties.Indexed as P
+import qualified Halogen.HTML.Events as E
+import qualified Halogen.HTML as H
 import qualified Halogen.HTML.Events.Handler as EH
 
 import Halogen.Menu.Component.State (Menu(), MenuItem())
@@ -59,7 +58,7 @@ instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress where compare = gCompar
 -- | Here is an example of a rendered menu with the first submenu selected.
 -- |
 -- | ```HTML
--- | <ul><li><button>Color</button><ul><li><button>Load color</button></li><li><button>Save color</button></li></ul></li><li><div><button>Edit</button></div></li></ul>
+-- | <ul><li><a>Color</a><ul><li><a>Load color</a></li><li><a>Save color</a></li></ul></li><li><div><a>Edit</a></div></li></ul>
 -- | ```
 -- |
 -- | ##### State
@@ -108,7 +107,7 @@ menuComponent = parentComponent' render eval peek
     renderChosenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderChosenSubmenu index menuSubmenu =
       H.li_
-        [ renderButton DismissSubmenu menuSubmenu.label
+        [ renderAnchor DismissSubmenu menuSubmenu.label
         , H.slot (SubmenuSlotAddress index) \_ ->
             { component: submenuComponent
             , initialState: menuSubmenu.submenu
@@ -117,27 +116,16 @@ menuComponent = parentComponent' render eval peek
 
     renderHiddenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderHiddenSubmenu index menuSubmenu =
-      H.li_ [ H.div_ [ renderButton (SelectSubmenu index) menuSubmenu.label ] ]
+      H.li_ [ H.div_ [ renderAnchor (SelectSubmenu index) menuSubmenu.label ] ]
 
     renderMouseOverSelectableHiddenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderMouseOverSelectableHiddenSubmenu index menuSubmenu =
-      H.li_
-        [ H.div_
-            [ renderButtonWithMouseoverAction (SelectSubmenu index) menuSubmenu.label ]
-        ]
+      H.li_ [ H.div_ [ renderAnchor (SelectSubmenu index) menuSubmenu.label ] ]
 
-    renderButton :: forall f p. Action f -> String -> HTML p f
-    renderButton a label =
-      H.button
+    renderAnchor :: forall f p. Action f -> String -> HTML p f
+    renderAnchor a label =
+      H.a
         [ E.onClick (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit) ]
-        [ H.text $ label ]
-
-    renderButtonWithMouseoverAction :: forall f p. Action f -> String -> HTML p f
-    renderButtonWithMouseoverAction a label =
-      H.button
-        [ E.onClick (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit)
-        , E.onMouseOver (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit)
-        ]
         [ H.text $ label ]
 
   eval :: Natural (MenuQuery a) (ParentDSL (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress)

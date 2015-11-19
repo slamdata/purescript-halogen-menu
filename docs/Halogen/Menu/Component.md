@@ -33,9 +33,9 @@ Data type that represents the Halogen slot address of a specific submenu.
 
 ##### Instances
 ``` purescript
-instance genericSubmenuSlotAddress :: Generic SubmenuSlotAddress
-instance eqSubmenuSlotAddress :: Eq SubmenuSlotAddress
-instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress
+Generic SubmenuSlotAddress
+Eq SubmenuSlotAddress
+Ord SubmenuSlotAddress
 ```
 
 #### `menuComponent`
@@ -53,7 +53,7 @@ dismissed. Selected submenus are also rendered as unordered lists.
 Here is an example of a rendered menu with the first submenu selected.
 
 ```HTML
-<ul><li><button>Color</button><ul><li><button>Load color</button></li><li><button>Save color</button></li></ul></li><li><div><button>Edit</button></div></li></ul>
+<ul><li><a>Color</a><ul><li><a>Load color</a></li><li><a>Save color</a></li></ul></li><li><div><a>Edit</a></div></li></ul>
 ```
 
 ##### State
