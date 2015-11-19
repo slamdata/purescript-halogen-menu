@@ -9,7 +9,6 @@ type Submenu a = Array (SubmenuItem a)
 #### `SubmenuItem`
 
 ``` purescript
-type SubmenuItem a = { label :: String, value :: a }
+type SubmenuItem a = { label :: String, shortcutLabel :: Maybe String, value :: a }
 ```
-
 
