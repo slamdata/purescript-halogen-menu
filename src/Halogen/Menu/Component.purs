@@ -20,9 +20,8 @@ import Data.NaturalTransformation (Natural())
 import Data.Tuple (Tuple(..))
 
 import Halogen
-import qualified Halogen.HTML.Events.Indexed as E
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Properties.Indexed as P
+import qualified Halogen.HTML.Events as E
+import qualified Halogen.HTML as H
 import qualified Halogen.HTML.Events.Handler as EH
 
 import Halogen.Menu.Component.State (Menu(), MenuItem())
@@ -59,17 +58,17 @@ instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress where compare = gCompar
 -- | Here is an example of a rendered menu with the first submenu selected.
 -- |
 -- | ```HTML
--- | <ul><li><button>Color</button><ul><li><button>Load color</button></li><li><button>Save color</button></li></ul></li><li><div><button>Edit</button></div></li></ul>
+-- | <ul><li><a>Color</a><ul><li><a><span>Load color</span></a></li><li><a><span>Save color</span></a></li></ul></li><li><div><a>Edit</a></div></li></ul>
 -- | ```
 -- |
 -- | ##### State
 -- | An example of constructing the initial state of a menu component is
 -- | available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditorMenu/Component/State.purs#L8).
+-- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditorMenu/Component/State.purs#L10).
 -- |
 -- | ##### Component
 -- | An example of installing a menu component is available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L79).
+-- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L72).
 -- |
 -- | ##### Query algebra
 -- | Selecting an item from a submenu will cause the submenu component to
@@ -83,14 +82,20 @@ instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress where compare = gCompar
 -- | If this value is specified as a query then it can be easily routed to
 -- | another component. This approach makes the intended effect of selecting a
 -- | submenu item quite clear. An example of this approach is available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L79).
+-- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L101).
 -- |
 -- | ##### Styling
 -- | Presented menus have no styling, ids or classes. To style a menu place it
 -- | inside of an element with a class or id and then provide styling for the
--- | unordered lists, items and buttons inside it. An example stylesheet is
+-- | unordered lists, items and anchors inside it. An example stylesheet is
 -- | available
 -- | [here](https://github.com/beckyconning/color-editor/blob/master/stylesheet.css).
+-- |
+-- | If you are providing keyboard shortcut labels to be rendered we recommend
+-- | using the flexible box model on the submenu item's anchor and a fifty
+-- | percent width for the spans inside it. If you can't use the flexible box
+-- | model we reccomend you define a fixed width for your submenus.
+
 menuComponent :: forall a g. (Functor g) => Component (MenuP a g) (MenuQueryP a) g
 menuComponent = parentComponent' render eval peek
   where
@@ -102,13 +107,12 @@ menuComponent = parentComponent' render eval peek
     renderSubmenu :: Tuple Int (MenuItem a) -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderSubmenu (Tuple index menuSubmenu)
       | menu.chosen == Just index = renderChosenSubmenu index menuSubmenu
-      | menu.chosen == Nothing = renderHiddenSubmenu index menuSubmenu
-      | otherwise = renderMouseOverSelectableHiddenSubmenu index menuSubmenu
+      | otherwise = renderHiddenSubmenu index menuSubmenu
 
     renderChosenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderChosenSubmenu index menuSubmenu =
       H.li_
-        [ renderButton DismissSubmenu menuSubmenu.label
+        [ renderAnchor DismissSubmenu menuSubmenu.label
         , H.slot (SubmenuSlotAddress index) \_ ->
             { component: submenuComponent
             , initialState: menuSubmenu.submenu
@@ -117,27 +121,12 @@ menuComponent = parentComponent' render eval peek
 
     renderHiddenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderHiddenSubmenu index menuSubmenu =
-      H.li_ [ H.div_ [ renderButton (SelectSubmenu index) menuSubmenu.label ] ]
+      H.li_ [ H.div_ [ renderAnchor (SelectSubmenu index) menuSubmenu.label ] ]
 
-    renderMouseOverSelectableHiddenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
-    renderMouseOverSelectableHiddenSubmenu index menuSubmenu =
-      H.li_
-        [ H.div_
-            [ renderButtonWithMouseoverAction (SelectSubmenu index) menuSubmenu.label ]
-        ]
-
-    renderButton :: forall f p. Action f -> String -> HTML p f
-    renderButton a label =
-      H.button
+    renderAnchor :: forall f p. Action f -> String -> HTML p f
+    renderAnchor a label =
+      H.a
         [ E.onClick (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit) ]
-        [ H.text $ label ]
-
-    renderButtonWithMouseoverAction :: forall f p. Action f -> String -> HTML p f
-    renderButtonWithMouseoverAction a label =
-      H.button
-        [ E.onClick (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit)
-        , E.onMouseOver (\_ -> EH.preventDefault *> EH.stopPropagation $> a unit)
-        ]
         [ H.text $ label ]
 
   eval :: Natural (MenuQuery a) (ParentDSL (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress)

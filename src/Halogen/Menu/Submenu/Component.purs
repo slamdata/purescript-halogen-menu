@@ -26,9 +26,9 @@ submenuComponent = component render eval
   renderItem :: (SubmenuItem a) -> HTML Void (SubmenuQuery a)
   renderItem item =
     H.li_
-      [ H.button
-          [ E.onClick $ E.input_ (SelectSubmenuItem item.value) ]
-          ([ H.text item.label ] ++ renderShortcutLabel item.shortcutLabel)
+      [ H.a
+          [ E.onMouseUp $ E.input_ (SelectSubmenuItem item.value) ]
+          ([ H.span_ [ H.text item.label ] ] ++ renderShortcutLabel item.shortcutLabel)
       ]
 
   renderShortcutLabel :: Maybe String -> Array (HTML Void (SubmenuQuery a))
