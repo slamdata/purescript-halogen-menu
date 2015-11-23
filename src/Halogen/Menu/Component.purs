@@ -107,8 +107,7 @@ menuComponent = parentComponent' render eval peek
     renderSubmenu :: Tuple Int (MenuItem a) -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderSubmenu (Tuple index menuSubmenu)
       | menu.chosen == Just index = renderChosenSubmenu index menuSubmenu
-      | menu.chosen == Nothing = renderHiddenSubmenu index menuSubmenu
-      | otherwise = renderMouseOverSelectableHiddenSubmenu index menuSubmenu
+      | otherwise = renderHiddenSubmenu index menuSubmenu
 
     renderChosenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderChosenSubmenu index menuSubmenu =
@@ -122,10 +121,6 @@ menuComponent = parentComponent' render eval peek
 
     renderHiddenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
     renderHiddenSubmenu index menuSubmenu =
-      H.li_ [ H.div_ [ renderAnchor (SelectSubmenu index) menuSubmenu.label ] ]
-
-    renderMouseOverSelectableHiddenSubmenu :: Int -> MenuItem a -> ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
-    renderMouseOverSelectableHiddenSubmenu index menuSubmenu =
       H.li_ [ H.div_ [ renderAnchor (SelectSubmenu index) menuSubmenu.label ] ]
 
     renderAnchor :: forall f p. Action f -> String -> HTML p f
