@@ -58,17 +58,17 @@ instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress where compare = gCompar
 -- | Here is an example of a rendered menu with the first submenu selected.
 -- |
 -- | ```HTML
--- | <ul><li><a>Color</a><ul><li><a>Load color</a></li><li><a>Save color</a></li></ul></li><li><div><a>Edit</a></div></li></ul>
+-- | <ul><li><a>Color</a><ul><li><a><span>Load color</span></a></li><li><a><span>Save color</span></a></li></ul></li><li><div><a>Edit</a></div></li></ul>
 -- | ```
 -- |
 -- | ##### State
 -- | An example of constructing the initial state of a menu component is
 -- | available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditorMenu/Component/State.purs#L8).
+-- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditorMenu/Component/State.purs#L10).
 -- |
 -- | ##### Component
 -- | An example of installing a menu component is available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L79).
+-- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L72).
 -- |
 -- | ##### Query algebra
 -- | Selecting an item from a submenu will cause the submenu component to
@@ -82,14 +82,20 @@ instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress where compare = gCompar
 -- | If this value is specified as a query then it can be easily routed to
 -- | another component. This approach makes the intended effect of selecting a
 -- | submenu item quite clear. An example of this approach is available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L79).
+-- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L101).
 -- |
 -- | ##### Styling
 -- | Presented menus have no styling, ids or classes. To style a menu place it
 -- | inside of an element with a class or id and then provide styling for the
--- | unordered lists, items and buttons inside it. An example stylesheet is
+-- | unordered lists, items and anchors inside it. An example stylesheet is
 -- | available
 -- | [here](https://github.com/beckyconning/color-editor/blob/master/stylesheet.css).
+-- |
+-- | If you are providing keyboard shortcut labels to be rendered we recommend
+-- | using the flexible box model on the submenu item's anchor and a fifty
+-- | percent width for the spans inside it. If you can't use the flexible box
+-- | model we reccomend you define a fixed width for your submenus.
+
 menuComponent :: forall a g. (Functor g) => Component (MenuP a g) (MenuQueryP a) g
 menuComponent = parentComponent' render eval peek
   where
