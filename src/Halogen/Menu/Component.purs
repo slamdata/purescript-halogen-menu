@@ -132,6 +132,7 @@ menuComponent = parentComponent' render eval peek
   eval :: Natural (MenuQuery a) (ParentDSL (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress)
   eval (SelectSubmenu index next) = modify (_ { chosen = Just index }) $> next
   eval (DismissSubmenu next) = modify (_ { chosen = Nothing }) $> next
+  eval (SetMenu menu next) = modify (const menu) $> next
 
   peek :: forall i. ChildF SubmenuSlotAddress (SubmenuQuery a) i -> ParentDSL (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress Unit
   peek (ChildF _ (SelectSubmenuItem _ _)) = modify (_ { chosen = Nothing }) *> pure unit
