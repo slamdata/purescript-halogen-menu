@@ -4,7 +4,8 @@
 
 ``` purescript
 data MenuQuery a next
-  = SelectSubmenu Int next
+  = SetMenu (Menu a) next
+  | SelectSubmenu Int next
   | DismissSubmenu next
 ```
 
