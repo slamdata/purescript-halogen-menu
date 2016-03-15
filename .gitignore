@@ -1,5 +1,7 @@
-/bower_components/
-/node_modules/
-/output/
-/.psci*
-/src/.webpack.js
+/.*
+!/.gitignore
+!/.travis.yml
+bower_components/
+node_modules/
+output/
+/example/example.js

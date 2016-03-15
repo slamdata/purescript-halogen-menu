@@ -1,13 +1,22 @@
 {
   "name": "purescript-halogen-menu",
+  "homepage": "https://github.com/slamdata/purescript-halogen-menu",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/slamdata/purescript-halogen-menu.git"
+  },
   "ignore": [
     "**/.*",
-    "node_modules",
     "bower_components",
-    "output"
+    "node_modules",
+    "output",
+    "test",
+    "bower.json",
+    "package.json"
   ],
   "dependencies": {
     "purescript-generics": "^0.7.0",
-    "purescript-halogen": "^0.5.8"
+    "purescript-halogen": "^0.6.1"
   }
 }

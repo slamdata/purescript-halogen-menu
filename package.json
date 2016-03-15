@@ -1,5 +1,15 @@
 {
+  "private": true,
+  "scripts": {
+    "clean": "rimraf output && rimraf .pulp-cache",
+    "build": "pulp build"
+  },
   "dependencies": {
     "virtual-dom": "^2.1.1"
+  },
+  "devDependencies": {
+    "pulp": "^8.1.0",
+    "purescript": "^0.7.6",
+    "rimraf": "^2.5.2"
   }
 }

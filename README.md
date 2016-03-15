@@ -1,4 +1,9 @@
 # purescript-halogen-menu
+
+[![Latest release](http://img.shields.io/bower/v/purescript-halogen-menu.svg)](https://github.com/slamdata/purescript-halogen-menu/releases)
+[![Build Status](https://travis-ci.org/slamdata/purescript-halogen-menu.svg?branch=master)](https://travis-ci.org/slamdata/purescript-halogen-menu)
+[![Dependency Status](https://www.versioneye.com/user/projects/56e8229d4e714c003625b3f2/badge.svg?style=flat)](https://www.versioneye.com/user/projects/56e8229d4e714c003625b3f2)
+
 A reusable halogen component that presents an interactive menu.
 
 ## HTML
@@ -40,12 +45,8 @@ Here is an example of a rendered menu with the first submenu selected.
 * Use the [included template](stylesheet.css) to define styling for the `ul`s, `li`s and `button`s in your menu using the class or id you defined previously as a root element as in [this example](https://github.com/beckyconning/color-editor/tree/94de4b0297ef1ed6e76561ec88234be0ca7f07bd/stylesheet.css#L17-L72).
 
 ## Module documentation
-* [Halogen.Menu.Component](docs/Halogen/Menu/Component.md)
-* [Halogen.Menu.Model](docs/Halogen/Menu/Model.md)
-* [Halogen.Menu.Query](docs/Halogen/Menu/Query.md)
-* [Halogen.Menu.Submenu.Component](docs/Halogen/Menu/Submenu/Component.md)
-* [Halogen.Menu.Submenu.Model](docs/Halogen/Menu/Submenu/Model.md)
-* [Halogen.Menu.Submenu.Query](docs/Halogen/Menu/Submenu/Query.md)
+
+Module documentation is [published on Pursuit](http://pursuit.purescript.org/packages/purescript-halogen-menu).
 
 ## Example
 An example Halogen application which uses `purescript-halogen-menu` is available [here](https://github.com/beckyconning/color-editor).
