@@ -1,7 +1,5 @@
 module Halogen.Menu.Component.State where
 
-import Prelude
-
 import Data.Maybe (Maybe(..))
 
 import Halogen.Menu.Submenu.Component.State (Submenu())

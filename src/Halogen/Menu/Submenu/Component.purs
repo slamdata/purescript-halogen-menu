@@ -7,33 +7,36 @@ module Halogen.Menu.Submenu.Component
 import Prelude
 
 import Data.Maybe (Maybe(), maybe)
-import Data.Void (Void())
+import Data.NaturalTransformation (Natural())
 
-import Halogen
-import qualified Halogen.HTML.Events.Indexed as E
-import qualified Halogen.HTML.Indexed as H
-
-import Halogen.Menu.Submenu.Component.State (Submenu(), SubmenuItem())
+import Halogen as H
+import Halogen.HTML.Events.Indexed as HE
+import Halogen.HTML.Indexed as HH
 import Halogen.Menu.Submenu.Component.Query (SubmenuQuery(..))
+import Halogen.Menu.Submenu.Component.State (Submenu(), SubmenuItem())
 
-submenuComponent :: forall g a. Component (Submenu a) (SubmenuQuery a) g
-submenuComponent = component render eval
+type HTML a = H.ComponentHTML (SubmenuQuery a)
+type DSL a g = H.ComponentDSL (Submenu a) (SubmenuQuery a) g
+
+submenuComponent :: forall g a. H.Component (Submenu a) (SubmenuQuery a) g
+submenuComponent = H.component { render, eval }
   where
 
-  render :: Render (Submenu a) (SubmenuQuery a)
-  render = H.ul_ <<< map renderItem
+  render :: Submenu a -> HTML a
+  render = HH.ul_ <<< map renderItem
 
-  renderItem :: (SubmenuItem a) -> HTML Void (SubmenuQuery a)
+  renderItem :: SubmenuItem a -> HTML a
   renderItem item =
-    H.li_
-      [ H.a
-          [ E.onMouseUp $ E.input_ (SelectSubmenuItem item.value) ]
-          ([ H.span_ [ H.text item.label ] ] ++ renderShortcutLabel item.shortcutLabel)
+    HH.li_
+      [ HH.a
+          [ HE.onMouseUp $ HE.input_ (SelectSubmenuItem item.value) ]
+          $ [ HH.span_ [ HH.text item.label ] ]
+          ++ renderShortcutLabel item.shortcutLabel
       ]
 
-  renderShortcutLabel :: Maybe String -> Array (HTML Void (SubmenuQuery a))
-  renderShortcutLabel = maybe [] (\s -> [ H.span_ [ H.text s ] ])
+  renderShortcutLabel :: Maybe String -> Array (HTML a)
+  renderShortcutLabel = maybe [] (\s -> [ HH.span_ [ HH.text s ] ])
 
-  eval :: Eval (SubmenuQuery a) (Submenu a) (SubmenuQuery a) g
+  eval :: Natural (SubmenuQuery a) (DSL a g)
   eval (SelectSubmenuItem _ next) = pure next
 
