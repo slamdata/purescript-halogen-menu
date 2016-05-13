@@ -17,6 +17,6 @@
   ],
   "dependencies": {
     "purescript-generics": "^0.7.0",
-    "purescript-halogen": "^0.7.0"
+    "purescript-halogen": "^0.8.0"
   }
 }

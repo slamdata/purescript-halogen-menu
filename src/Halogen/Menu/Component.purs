@@ -127,7 +127,7 @@ menuComponent = H.parentComponent { render, eval, peek: Just (peek <<< H.runChil
     renderAnchor :: H.Action (MenuQuery a) -> String -> HTML a g
     renderAnchor a label =
       HH.a
-        [ HE.onClick (\_ -> HEH.preventDefault *> HEH.stopPropagation $> H.action a) ]
+        [ HE.onClick (\_ -> HEH.preventDefault *> HEH.stopPropagation $> Just (H.action a)) ]
         [ HH.text $ label ]
 
   eval :: Natural (MenuQuery a) (DSL a g)
