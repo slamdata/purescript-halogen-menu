@@ -6,14 +6,13 @@ module Halogen.Menu.Submenu.Component
 
 import Prelude
 
-import Data.Maybe (Maybe(), maybe)
-import Data.NaturalTransformation (Natural())
+import Data.Maybe (Maybe, maybe)
 
 import Halogen as H
 import Halogen.HTML.Events.Indexed as HE
 import Halogen.HTML.Indexed as HH
 import Halogen.Menu.Submenu.Component.Query (SubmenuQuery(..))
-import Halogen.Menu.Submenu.Component.State (Submenu(), SubmenuItem())
+import Halogen.Menu.Submenu.Component.State (Submenu, SubmenuItem)
 
 type HTML a = H.ComponentHTML (SubmenuQuery a)
 type DSL a g = H.ComponentDSL (Submenu a) (SubmenuQuery a) g
@@ -31,12 +30,11 @@ submenuComponent = H.component { render, eval }
       [ HH.a
           [ HE.onMouseUp $ HE.input_ (SelectSubmenuItem item.value) ]
           $ [ HH.span_ [ HH.text item.label ] ]
-          ++ renderShortcutLabel item.shortcutLabel
+          <> renderShortcutLabel item.shortcutLabel
       ]
 
   renderShortcutLabel :: Maybe String -> Array (HTML a)
   renderShortcutLabel = maybe [] (\s -> [ HH.span_ [ HH.text s ] ])
 
-  eval :: Natural (SubmenuQuery a) (DSL a g)
+  eval :: SubmenuQuery a ~> DSL a g
   eval (SelectSubmenuItem _ next) = pure next
-
