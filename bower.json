@@ -16,7 +16,7 @@
     "package.json"
   ],
   "dependencies": {
-    "purescript-generics": "^0.7.0",
-    "purescript-halogen": "^0.8.0"
+    "purescript-generics": "^1.0.0",
+    "purescript-halogen": "^0.10.0"
   }
 }

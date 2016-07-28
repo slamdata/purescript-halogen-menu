@@ -1,6 +1,6 @@
 module Halogen.Menu.Component
-  ( MenuP()
-  , MenuQueryP()
+  ( MenuP
+  , MenuQueryP
   , SubmenuSlotAddress(..)
   , menuComponent
   , module Halogen.Menu.Component.State
@@ -9,25 +9,20 @@ module Halogen.Menu.Component
 
 import Prelude
 
-import Control.Apply ((*>))
-
-import Data.Array (zip, (..), length)
-import Data.Functor (($>))
-import Data.Functor.Coproduct (Coproduct())
-import Data.Generic (class Generic, gEq, gCompare)
+import Data.Array (mapWithIndex)
+import Data.Functor.Coproduct (Coproduct)
+import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
-import Data.NaturalTransformation (Natural())
-import Data.Tuple (Tuple(..))
 
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Events.Handler as HEH
 import Halogen.Menu.Component.Query (MenuQuery(..))
-import Halogen.Menu.Component.State (Menu(), MenuItem())
+import Halogen.Menu.Component.State (Menu, MenuItem)
 import Halogen.Menu.Submenu.Component (submenuComponent)
 import Halogen.Menu.Submenu.Component.Query (SubmenuQuery(..))
-import Halogen.Menu.Submenu.Component.State (Submenu())
+import Halogen.Menu.Submenu.Component.State (Submenu)
 
 -- | Type synonym for the state of menu components.
 -- |
@@ -45,8 +40,8 @@ type MenuQueryP a = Coproduct (MenuQuery a) (H.ChildF SubmenuSlotAddress (Submen
 newtype SubmenuSlotAddress = SubmenuSlotAddress Int
 
 derive instance genericSubmenuSlotAddress :: Generic SubmenuSlotAddress
-instance eqSubmenuSlotAddress :: Eq SubmenuSlotAddress where eq = gEq
-instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress where compare = gCompare
+derive instance eqSubmenuSlotAddress :: Eq SubmenuSlotAddress
+derive instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress
 
 type HTML a g = H.ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
 type DSL a g = H.ParentDSL (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
@@ -97,43 +92,42 @@ type DSL a g = H.ParentDSL (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g
 -- | using the flexible box model on the submenu item's anchor and a fifty
 -- | percent width for the spans inside it. If you can't use the flexible box
 -- | model we reccomend you define a fixed width for your submenus.
-menuComponent :: forall a g. (Functor g) => H.Component (MenuP a g) (MenuQueryP a) g
+menuComponent :: forall a g. Functor g => H.Component (MenuP a g) (MenuQueryP a) g
 menuComponent = H.parentComponent { render, eval, peek: Just (peek <<< H.runChildF) }
-  where
 
-  render :: Menu a -> HTML a g
-  render menu = HH.ul_ $ map renderSubmenu (zip (0 .. (length menu.submenus - 1)) menu.submenus)
-    where
+render :: forall a g. Menu a -> HTML a g
+render menu =
+  HH.ul_ $ mapWithIndex (renderSubmenu menu) menu.submenus
 
-    renderSubmenu :: Tuple Int (MenuItem a) -> HTML a g
-    renderSubmenu (Tuple index menuSubmenu)
-      | menu.chosen == Just index = renderChosenSubmenu index menuSubmenu
-      | otherwise = renderHiddenSubmenu index menuSubmenu
+renderSubmenu :: forall a g. Menu a -> Int -> MenuItem a -> HTML a g
+renderSubmenu menu index menuSubmenu
+  | menu.chosen == Just index = renderChosenSubmenu index menuSubmenu
+  | otherwise = renderHiddenSubmenu index menuSubmenu
 
-    renderChosenSubmenu :: Int -> MenuItem a -> HTML a g
-    renderChosenSubmenu index menuSubmenu =
-      HH.li_
-        [ renderAnchor DismissSubmenu menuSubmenu.label
-        , HH.slot (SubmenuSlotAddress index) \_ ->
-            { component: submenuComponent
-            , initialState: menuSubmenu.submenu
-            }
-        ]
+renderChosenSubmenu :: forall a g. Int -> MenuItem a -> HTML a g
+renderChosenSubmenu index menuSubmenu =
+  HH.li_
+    [ renderAnchor DismissSubmenu menuSubmenu.label
+    , HH.slot (SubmenuSlotAddress index) \_ ->
+        { component: submenuComponent
+        , initialState: menuSubmenu.submenu
+        }
+    ]
 
-    renderHiddenSubmenu :: Int -> MenuItem a -> HTML a g
-    renderHiddenSubmenu index menuSubmenu =
-      HH.li_ [ HH.div_ [ renderAnchor (SelectSubmenu index) menuSubmenu.label ] ]
+renderHiddenSubmenu :: forall a g. Int -> MenuItem a -> HTML a g
+renderHiddenSubmenu index menuSubmenu =
+  HH.li_ [ HH.div_ [ renderAnchor (SelectSubmenu index) menuSubmenu.label ] ]
 
-    renderAnchor :: H.Action (MenuQuery a) -> String -> HTML a g
-    renderAnchor a label =
-      HH.a
-        [ HE.onClick (\_ -> HEH.preventDefault *> HEH.stopPropagation $> Just (H.action a)) ]
-        [ HH.text $ label ]
+renderAnchor :: forall a g. H.Action (MenuQuery a) -> String -> HTML a g
+renderAnchor a label =
+  HH.a
+    [ HE.onClick (\_ -> HEH.preventDefault *> HEH.stopPropagation $> Just (H.action a)) ]
+    [ HH.text $ label ]
 
-  eval :: Natural (MenuQuery a) (DSL a g)
-  eval (SelectSubmenu index next) = H.modify (_ { chosen = Just index }) $> next
-  eval (DismissSubmenu next) = H.modify (_ { chosen = Nothing }) $> next
-  eval (SetMenu menu next) = H.set menu $> next
+eval :: forall a g. MenuQuery a ~> DSL a g
+eval (SelectSubmenu index next) = H.modify (_ { chosen = Just index }) $> next
+eval (DismissSubmenu next) = H.modify (_ { chosen = Nothing }) $> next
+eval (SetMenu menu next) = H.set menu $> next
 
-  peek :: forall x. SubmenuQuery a x -> DSL a g Unit
-  peek (SelectSubmenuItem _ _) = H.modify (_ { chosen = Nothing }) *> pure unit
+peek :: forall a g x. SubmenuQuery a x -> DSL a g Unit
+peek (SelectSubmenuItem _ _) = H.modify (_ { chosen = Nothing }) *> pure unit

@@ -1,6 +1,6 @@
 module Halogen.Menu.Submenu.Component.State where
 
-import Data.Maybe (Maybe())
+import Data.Maybe (Maybe)
 
 type Submenu a = Array (SubmenuItem a)
 
@@ -9,4 +9,3 @@ type SubmenuItem a =
   , shortcutLabel :: Maybe String
   , value :: a
   }
-
