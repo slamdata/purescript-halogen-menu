@@ -1,8 +1,7 @@
 # purescript-halogen-menu
 
-[![Latest release](http://img.shields.io/bower/v/purescript-halogen-menu.svg)](https://github.com/slamdata/purescript-halogen-menu/releases)
-[![Build Status](https://travis-ci.org/slamdata/purescript-halogen-menu.svg?branch=master)](https://travis-ci.org/slamdata/purescript-halogen-menu)
-[![Dependency Status](https://www.versioneye.com/user/projects/56e8229d4e714c003625b3f2/badge.svg?style=flat)](https://www.versioneye.com/user/projects/56e8229d4e714c003625b3f2)
+[![Latest release](http://img.shields.io/github/release/slamdata/purescript-halogen-menu.svg)](https://github.com/slamdata/purescript-halogen-menu/releases)
+[![Build status](https://travis-ci.org/slamdata/purescript-halogen-menu.svg?branch=master)](https://travis-ci.org/slamdata/purescript-halogen-menu)
 
 A reusable halogen component that presents an interactive menu.
 
