@@ -1,40 +1,66 @@
 module Halogen.Menu.Submenu.Component
-  ( submenuComponent
-  , module Halogen.Menu.Submenu.Component.State
-  , module Halogen.Menu.Submenu.Component.Query
+  ( component
+  , State
+  , Query(..)
+  , Message(..)
+  , SubmenuItem
   ) where
 
 import Prelude
 
-import Data.Maybe (Maybe, maybe)
+import Data.Array as Arr
+import Data.Foldable as F
+import Data.Maybe (Maybe(..))
 
 import Halogen as H
-import Halogen.HTML.Events.Indexed as HE
-import Halogen.HTML.Indexed as HH
-import Halogen.Menu.Submenu.Component.Query (SubmenuQuery(..))
-import Halogen.Menu.Submenu.Component.State (Submenu, SubmenuItem)
+import Halogen.HTML.Events as HE
+import Halogen.HTML as HH
 
-type HTML a = H.ComponentHTML (SubmenuQuery a)
-type DSL a g = H.ComponentDSL (Submenu a) (SubmenuQuery a) g
+type State a = Array (SubmenuItem a)
 
-submenuComponent :: forall g a. H.Component (Submenu a) (SubmenuQuery a) g
-submenuComponent = H.component { render, eval }
+type SubmenuItem a =
+  { label ∷ String
+  , shortcutLabel ∷ Maybe String
+  , value ∷ a
+  }
+
+data Query a next
+  = Select a next
+  | SetState (State a) next
+
+data Message a = Selected a
+
+type HTML a = H.ComponentHTML (Query a)
+type DSL a g = H.ComponentDSL (State a) (Query a) (Message a) g
+
+component ∷ ∀ m a. H.Component HH.HTML (Query a) (State a) (Message a) m
+component = H.component
+  { render
+  , eval
+  , initialState: id
+  , receiver: Just <<< H.action <<< SetState
+  }
+
+render ∷ ∀ a. State a → HTML a
+render = HH.ul_ <<< map renderItem
   where
-
-  render :: Submenu a -> HTML a
-  render = HH.ul_ <<< map renderItem
-
-  renderItem :: SubmenuItem a -> HTML a
+  renderItem ∷ SubmenuItem a → HTML a
   renderItem item =
     HH.li_
       [ HH.a
-          [ HE.onMouseUp $ HE.input_ (SelectSubmenuItem item.value) ]
+          [ HE.onMouseUp $ HE.input_ (Select item.value) ]
           $ [ HH.span_ [ HH.text item.label ] ]
           <> renderShortcutLabel item.shortcutLabel
       ]
+  renderShortcutLabel ∷ Maybe String → Array (HTML a)
+  renderShortcutLabel =
+    F.foldMap $ Arr.singleton <<< HH.span_ <<< Arr.singleton <<< HH.text
 
-  renderShortcutLabel :: Maybe String -> Array (HTML a)
-  renderShortcutLabel = maybe [] (\s -> [ HH.span_ [ HH.text s ] ])
-
-  eval :: SubmenuQuery a ~> DSL a g
-  eval (SelectSubmenuItem _ next) = pure next
+eval ∷ ∀ a g. Query a ~> DSL a g
+eval = case _ of
+  Select val next → do
+    H.raise $ Selected val
+    pure next
+  SetState st next → do
+    H.put st
+    pure next
