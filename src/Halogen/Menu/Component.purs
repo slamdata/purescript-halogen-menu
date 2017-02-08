@@ -1,133 +1,107 @@
 module Halogen.Menu.Component
-  ( MenuP
-  , MenuQueryP
-  , SubmenuSlotAddress(..)
-  , menuComponent
-  , module Halogen.Menu.Component.State
-  , module Halogen.Menu.Component.Query
+  ( component
+  , MenuItem
+  , State
+  , Query(..)
+  , Message(..)
   ) where
 
 import Prelude
 
+import Control.Monad.Aff.Class (class MonadAff)
+import Control.Monad.Eff.Class (liftEff)
+
 import Data.Array (mapWithIndex)
-import Data.Functor.Coproduct (Coproduct)
-import Data.Generic (class Generic)
 import Data.Maybe (Maybe(..))
+
+import DOM (DOM)
+import DOM.Event.Types as DET
+import DOM.Event.Event as DEE
 
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
-import Halogen.HTML.Events.Handler as HEH
-import Halogen.Menu.Component.Query (MenuQuery(..))
-import Halogen.Menu.Component.State (Menu, MenuItem)
-import Halogen.Menu.Submenu.Component (submenuComponent)
-import Halogen.Menu.Submenu.Component.Query (SubmenuQuery(..))
-import Halogen.Menu.Submenu.Component.State (Submenu)
+import Halogen.Menu.Submenu.Component as SUB
 
--- | Type synonym for the state of menu components.
--- |
--- | The `a` parameter represents the type of value to be included in the
--- | submenu component's `SelectSubmenuOption` query.
-type MenuP a g = H.ParentState (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
+data Query a next
+  = Set (State a) next
+  | SelectSubmenu Int DET.MouseEvent next
+  | DismissSubmenu DET.MouseEvent next
+  | HandleSubmenu (SUB.Message a) next
 
--- | Type synonym for the query algebra of menu components.
--- |
--- | The `a` parameter represents the type of value to be included in the
--- | submenu component's `SelectSubmenuOption` query.
-type MenuQueryP a = Coproduct (MenuQuery a) (H.ChildF SubmenuSlotAddress (SubmenuQuery a))
+type State a =
+  { chosen ∷ Maybe Int
+  , submenus ∷ Array (MenuItem a)
+  }
 
--- | Data type that represents the Halogen slot address of a specific submenu.
-newtype SubmenuSlotAddress = SubmenuSlotAddress Int
+type MenuItem a = { label ∷ String, submenu ∷ SUB.State a }
 
-derive instance genericSubmenuSlotAddress :: Generic SubmenuSlotAddress
-derive instance eqSubmenuSlotAddress :: Eq SubmenuSlotAddress
-derive instance ordSubmenuSlotAddress :: Ord SubmenuSlotAddress
+data Message a = Selected a
 
-type HTML a g = H.ParentHTML (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
-type DSL a g = H.ParentDSL (Menu a) (Submenu a) (MenuQuery a) (SubmenuQuery a) g SubmenuSlotAddress
+type HTML a m = H.ParentHTML (Query a) (SUB.Query a) Int m
+type DSL a m = H.ParentDSL (State a) (Query a) (SUB.Query a) Int (Message a) m
+type Input a = Array { label ∷ String, submenu ∷ SUB.State a }
 
--- | A Halogen component which presents an interactive menu.
--- |
--- | ##### HTML
--- | Menus are rendered as unordered lists of submenus which can be selected and
--- | dismissed. Selected submenus are also rendered as unordered lists.
--- |
--- | Here is an example of a rendered menu with the first submenu selected.
--- |
--- | ```HTML
--- | <ul><li><a>Color</a><ul><li><a><span>Load color</span></a></li><li><a><span>Save color</span></a></li></ul></li><li><div><a>Edit</a></div></li></ul>
--- | ```
--- |
--- | ##### State
--- | An example of constructing the initial state of a menu component is
--- | available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditorMenu/Component/State.purs#L10).
--- |
--- | ##### Component
--- | An example of installing a menu component is available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L72).
--- |
--- | ##### Query algebra
--- | Selecting an item from a submenu will cause the submenu component to
--- | evaluate a `SelectedSubmenuItem` query. This query contains a value which
--- | is specified in the initial state of the menu.
--- |
--- | This value may be of any type. The peek function of the component in which
--- | the menu is installed (or its parents) may transform this value into
--- | operations which modify component state or query other components.
--- |
--- | If this value is specified as a query then it can be easily routed to
--- | another component. This approach makes the intended effect of selecting a
--- | submenu item quite clear. An example of this approach is available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/src/ColorEditor/Component.purs#L101).
--- |
--- | ##### Styling
--- | Presented menus have no styling, ids or classes. To style a menu place it
--- | inside of an element with a class or id and then provide styling for the
--- | unordered lists, items and anchors inside it. An example stylesheet is
--- | available
--- | [here](https://github.com/beckyconning/color-editor/blob/master/stylesheet.css).
--- |
--- | If you are providing keyboard shortcut labels to be rendered we recommend
--- | using the flexible box model on the submenu item's anchor and a fifty
--- | percent width for the spans inside it. If you can't use the flexible box
--- | model we reccomend you define a fixed width for your submenus.
-menuComponent :: forall a g. Functor g => H.Component (MenuP a g) (MenuQueryP a) g
-menuComponent = H.parentComponent { render, eval, peek: Just (peek <<< H.runChildF) }
+component
+  ∷ ∀ m a r
+  . (MonadAff (dom ∷ DOM|r) m)
+  ⇒ H.Component HH.HTML (Query a) (Input a) (Message a) m
+component = H.parentComponent
+  { initialState: \submenus → { chosen: Nothing, submenus }
+  , receiver: const Nothing
+  , eval
+  , render
+  }
 
-render :: forall a g. Menu a -> HTML a g
-render menu =
-  HH.ul_ $ mapWithIndex (renderSubmenu menu) menu.submenus
+render
+  ∷ ∀ a m r
+  . (MonadAff (dom ∷ DOM|r) m)
+  ⇒ State a → HTML a m
+render state =
+  HH.ul_ $ mapWithIndex (renderSubmenu state) state.submenus
+  where
+  renderSubmenu ∷ State a → Int → MenuItem a → HTML a m
+  renderSubmenu menu index submenu = case menu.chosen of
+    Just ix | ix == index → renderChosenSubmenu ix submenu
+    _ → renderHiddenSubmenu index submenu
 
-renderSubmenu :: forall a g. Menu a -> Int -> MenuItem a -> HTML a g
-renderSubmenu menu index menuSubmenu
-  | menu.chosen == Just index = renderChosenSubmenu index menuSubmenu
-  | otherwise = renderHiddenSubmenu index menuSubmenu
+  renderChosenSubmenu ∷ Int → MenuItem a → HTML a m
+  renderChosenSubmenu ix submenu =
+    HH.li_
+      [ renderAnchor DismissSubmenu submenu.label
+      , HH.slot ix SUB.component submenu.submenu $ HE.input HandleSubmenu
+      ]
 
-renderChosenSubmenu :: forall a g. Int -> MenuItem a -> HTML a g
-renderChosenSubmenu index menuSubmenu =
-  HH.li_
-    [ renderAnchor DismissSubmenu menuSubmenu.label
-    , HH.slot (SubmenuSlotAddress index) \_ ->
-        { component: submenuComponent
-        , initialState: menuSubmenu.submenu
-        }
-    ]
+  renderHiddenSubmenu ∷ Int → MenuItem a → HTML a m
+  renderHiddenSubmenu ix submenu =
+    HH.li_ [ HH.div_ [ renderAnchor (SelectSubmenu ix) submenu.label ] ]
 
-renderHiddenSubmenu :: forall a g. Int -> MenuItem a -> HTML a g
-renderHiddenSubmenu index menuSubmenu =
-  HH.li_ [ HH.div_ [ renderAnchor (SelectSubmenu index) menuSubmenu.label ] ]
+  renderAnchor ∷ (DET.MouseEvent → H.Action (Query a)) → String → HTML a m
+  renderAnchor query label =
+    HH.a
+      [ HE.onClick (HE.input query) ]
+      [ HH.text label ]
 
-renderAnchor :: forall a g. H.Action (MenuQuery a) -> String -> HTML a g
-renderAnchor a label =
-  HH.a
-    [ HE.onClick (\_ -> HEH.preventDefault *> HEH.stopPropagation $> Just (H.action a)) ]
-    [ HH.text $ label ]
-
-eval :: forall a g. MenuQuery a ~> DSL a g
-eval (SelectSubmenu index next) = H.modify (_ { chosen = Just index }) $> next
-eval (DismissSubmenu next) = H.modify (_ { chosen = Nothing }) $> next
-eval (SetMenu menu next) = H.set menu $> next
-
-peek :: forall a g x. SubmenuQuery a x -> DSL a g Unit
-peek (SelectSubmenuItem _ _) = H.modify (_ { chosen = Nothing }) *> pure unit
+eval
+  ∷ ∀ a m r
+  . (MonadAff (dom ∷ DOM|r) m)
+  ⇒ Query a ~> DSL a m
+eval = case _ of
+  SelectSubmenu ix e next → do
+    liftEff do
+      DEE.preventDefault $ DET.mouseEventToEvent e
+      DEE.stopPropagation $ DET.mouseEventToEvent e
+    H.modify _{ chosen = Just ix }
+    pure next
+  DismissSubmenu e next → do
+    liftEff do
+      DEE.preventDefault $ DET.mouseEventToEvent e
+      DEE.stopPropagation $ DET.mouseEventToEvent e
+    H.modify _{ chosen = Nothing }
+    pure next
+  Set state next → do
+    H.put state
+    pure next
+  HandleSubmenu (SUB.Selected a) next → do
+    H.raise $ Selected a
+    pure next
