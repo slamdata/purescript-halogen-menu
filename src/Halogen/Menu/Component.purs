@@ -26,7 +26,7 @@ import Halogen.Menu.Submenu.Component as SUB
 data Query a next
   = Set (State a) next
   | SelectSubmenu Int next
-  | HandleMouseEvent (H.Action (Query a)) DET.MouseEvent next
+  | HandleMouseEvent DET.MouseEvent (Query a next)
   | DismissSubmenu next
   | HandleSubmenu (SUB.Message a) next
 
@@ -80,7 +80,7 @@ render state =
   renderAnchor ∷ H.Action (Query a) → String → HTML a m
   renderAnchor query label =
     HH.a
-      [ HE.onClick $ HE.input $ HandleMouseEvent query ]
+      [ HE.onClick \e → Just $ HandleMouseEvent e $ H.action query ]
       [ HH.text label ]
 
 eval
@@ -88,12 +88,11 @@ eval
   . (MonadAff (dom ∷ DOM|r) m)
   ⇒ Query a ~> DSL a m
 eval = case _ of
-  HandleMouseEvent q e next → do
+  HandleMouseEvent e query → do
     H.liftEff do
       DEE.preventDefault $ DET.mouseEventToEvent e
       DEE.stopPropagation $ DET.mouseEventToEvent e
-    eval $ H.action q
-    pure next
+    eval query
   SelectSubmenu ix next → do
     H.modify _{ chosen = Just ix }
     pure next
