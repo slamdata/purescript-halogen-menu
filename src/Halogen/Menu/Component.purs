@@ -13,6 +13,7 @@ import Control.Monad.Eff.Class (liftEff)
 
 import Data.Array (mapWithIndex)
 import Data.Foldable (for_)
+
 import Data.Maybe (Maybe(..))
 
 import DOM (DOM)
