@@ -9,9 +9,9 @@ module Halogen.Menu.Component
 import Prelude
 
 import Control.Monad.Aff.Class (class MonadAff)
-import Control.Monad.Eff.Class (liftEff)
 
 import Data.Array (mapWithIndex)
+
 import Data.Maybe (Maybe(..))
 
 import DOM (DOM)
@@ -25,8 +25,9 @@ import Halogen.Menu.Submenu.Component as SUB
 
 data Query a next
   = Set (State a) next
-  | SelectSubmenu Int DET.MouseEvent next
-  | DismissSubmenu DET.MouseEvent next
+  | SelectSubmenu Int next
+  | HandleMouseEvent DET.MouseEvent (Query a next)
+  | DismissSubmenu next
   | HandleSubmenu (SUB.Message a) next
 
 type State a =
@@ -76,10 +77,10 @@ render state =
   renderHiddenSubmenu ix submenu =
     HH.li_ [ HH.div_ [ renderAnchor (SelectSubmenu ix) submenu.label ] ]
 
-  renderAnchor ∷ (DET.MouseEvent → H.Action (Query a)) → String → HTML a m
+  renderAnchor ∷ H.Action (Query a) → String → HTML a m
   renderAnchor query label =
     HH.a
-      [ HE.onClick (HE.input query) ]
+      [ HE.onClick \e → Just $ HandleMouseEvent e $ H.action query ]
       [ HH.text label ]
 
 eval
@@ -87,16 +88,15 @@ eval
   . (MonadAff (dom ∷ DOM|r) m)
   ⇒ Query a ~> DSL a m
 eval = case _ of
-  SelectSubmenu ix e next → do
-    liftEff do
+  HandleMouseEvent e query → do
+    H.liftEff do
       DEE.preventDefault $ DET.mouseEventToEvent e
       DEE.stopPropagation $ DET.mouseEventToEvent e
+    eval query
+  SelectSubmenu ix next → do
     H.modify _{ chosen = Just ix }
     pure next
-  DismissSubmenu e next → do
-    liftEff do
-      DEE.preventDefault $ DET.mouseEventToEvent e
-      DEE.stopPropagation $ DET.mouseEventToEvent e
+  DismissSubmenu next → do
     H.modify _{ chosen = Nothing }
     pure next
   Set state next → do
